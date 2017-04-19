@@ -1,0 +1,85 @@
+CREATE TABLE user(
+	username	varchar(25) NOT NULL PRIMARY KEY,
+	salt	varchar(25),
+	hashed_password	varchar(50),
+	usertype	varchar(25)
+)ENGINE=INNODB;
+
+CREATE TABLE keg(
+	keg_id		integer NOT NULL PRIMARY KEY, -- not auto_increment since might use barcode#
+	location	varchar(20) NOT NULL,
+	batch_id	integer,
+	FOREIGN KEY (batch_id) REFERENCES batch(batch_id)
+)ENGINE=INNODB;
+
+CREATE TABLE beer(
+	name	varchar(20) NOT NULL PRIMARY KEY
+)ENGINE=INNODB;
+
+CREATE TABLE batch(
+	batch_id	integer NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	beer_name	varchar(20),
+	sched_ts	timestamp,
+	pack_ts		timestamp,
+	ship_ts		timestamp,
+	brew_ts		timestamp,
+	username	varchar(20) NOT NULL,
+	FOREIGN KEY (beer_name) REFERENCES beer(name)
+)ENGINE=INNODB;
+
+CREATE TABLE beer_type(
+	type	varchar(20) NOT NULL PRIMARY KEY
+)ENGINE=INNODB;
+
+CREATE TABLE beer_beertype(
+	beer_name	varchar(20),
+	beer_type	varchar(20),
+    FOREIGN KEY (beer_name) REFERENCES beer(name),
+    FOREIGN KEY (beer_type) REFERENCES beer_type(type)
+)ENGINE=INNODB;
+
+CREATE TABLE unit(
+	unit_id	integer NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	name	varchar(20) NOT NULL
+)ENGINE=INNODB;
+
+CREATE TABLE ingredient(
+	name		varchar(20) NOT NULL PRIMARY KEY,
+	inventory	integer NOT NULL,
+	lot_number	varchar(20) NOT NULL,
+	unit_id		integer,
+    FOREIGN KEY (unit_id) REFERENCES unit(unit_id)
+)ENGINE=INNODB;
+
+CREATE TABLE beer_ingredient(
+	beer_name 		varchar(20),
+	ingredient_name	varchar(20),
+    FOREIGN KEY (beer_name) REFERENCES beer(name),
+    FOREIGN KEY (ingredient_name) REFERENCES ingredient(name)
+)ENGINE=INNODB;
+
+CREATE TABLE order_(
+	order_id		integer NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	ingredient_name	varchar(20),
+	order_date		timestamp NOT NULL,
+	expiration_date	timestamp,
+    FOREIGN KEY (ingredient_name) REFERENCES ingredient(name)
+)ENGINE=INNODB;
+
+CREATE TABLE fermentation_type(
+	ft_id				integer NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	ph					float NOT NULL,
+	specific_gravity	float NOT NULL
+)ENGINE=INNODB;
+
+CREATE TABLE fermentation(
+	f_id		integer NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	ft_id		integer,
+	batch_id	integer,
+	value		float NOT NULL,
+	unit_id		integer,
+	timestamp	timestamp,
+    FOREIGN KEY (ft_id) REFERENCES fermentation_type(ft_id),
+    FOREIGN KEY (batch_id) REFERENCES batch(batch_id),
+    FOREIGN KEY (unit_id) REFERENCES unit(unit_id)
+)ENGINE=INNODB;
